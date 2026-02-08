@@ -1,20 +1,24 @@
 const express = require("express");
 const app = express();
 
-// VERY IMPORTANT
 app.use(express.json());
 
-app.post("/test", (req, res) => {
-  res.status(200).json({
-    message: "POST working",
-    body: req.body,
-  });
-});
+// Log to confirm server runs
+console.log("🔥 THIS SERVER.JS IS DEFINITELY RUNNING 🔥");
 
+// Import routes
+const healthRoutes = require("./routes/healthRoutes");
+const authRoutes = require("./routes/authRoutes");
+
+// Mount routes
+app.use("/api/health", healthRoutes);
+app.use("/api/auth", authRoutes);
+
+// Optional test route
 app.get("/test", (req, res) => {
   res.send("GET working");
 });
 
-app.listen(5000, () => {
-  console.log("✅ Server running on port 5000");
+app.listen(5050, () => {
+  console.log("✅ Server running on port 5050");
 });

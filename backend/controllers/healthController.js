@@ -1,8 +1,6 @@
-const healthCheck = (req, res) => {
+exports.healthCheck = (req, res) => {
   res.status(200).json({
     status: "OK",
-    message: "CollabFlow server is healthy 🚀"
+    message: "CollabFlow server is healthy 🚀",
   });
 };
-
-module.exports = { healthCheck };
