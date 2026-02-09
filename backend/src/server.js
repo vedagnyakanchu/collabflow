@@ -7,8 +7,8 @@ app.use(express.json());
 console.log("🔥 THIS SERVER.JS IS DEFINITELY RUNNING 🔥");
 
 // Import routes
-const healthRoutes = require("./routes/healthRoutes");
-const authRoutes = require("./routes/authRoutes");
+const healthRoutes = require("../routes/healthRoutes");
+const authRoutes = require("../routes/authRoutes");
 
 // Mount routes
 app.use("/api/health", healthRoutes);

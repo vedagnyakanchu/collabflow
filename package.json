@@ -1,0 +1,11 @@
+{
+  "name": "collabflow-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "start:backend": "node backend/src/server.js",
+    "dev:backend": "npx nodemon backend/src/server.js",
+    "dev": "npm run dev:backend"
+  }
+}
