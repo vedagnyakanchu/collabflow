@@ -1,10 +1,9 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-const app = require("./app");
-const connectDB = require("../config/db");
+const app = require("./app");          // app.js is in SAME folder
+const connectDB = require("../config/db"); // 👈 FIXED PATH
 
-// Connect to MongoDB
 connectDB();
 
 const PORT = process.env.PORT || 5000;
