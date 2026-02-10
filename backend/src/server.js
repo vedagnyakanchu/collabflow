@@ -1,24 +1,14 @@
-const express = require("express");
-const app = express();
+const dotenv = require("dotenv");
+dotenv.config();
 
-app.use(express.json());
+const app = require("./app");
+const connectDB = require("../config/db");
 
-// Log to confirm server runs
-console.log("🔥 THIS SERVER.JS IS DEFINITELY RUNNING 🔥");
+// Connect to MongoDB
+connectDB();
 
-// Import routes
-const healthRoutes = require("../routes/healthRoutes");
-const authRoutes = require("../routes/authRoutes");
+const PORT = process.env.PORT || 5000;
 
-// Mount routes
-app.use("/api/health", healthRoutes);
-app.use("/api/auth", authRoutes);
-
-// Optional test route
-app.get("/test", (req, res) => {
-  res.send("GET working");
-});
-
-app.listen(5050, () => {
-  console.log("✅ Server running on port 5050");
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -1,12 +1,7 @@
 const express = require("express");
-const { register, login } = require("../controllers/authController");
-
 const router = express.Router();
+const { registerUser } = require("../controllers/authController");
 
-router.post("/register", register);
-
-// ❌ PROBLEM: export missing here
-
-router.post("/login", login);
+router.post("/register", registerUser);
 
 module.exports = router;
