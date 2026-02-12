@@ -1,64 +1,26 @@
 const express = require("express");
 const router = express.Router();
-
 const Task = require("../models/Task");
 const authMiddleware = require("../middleware/authMiddleware");
 
-// CREATE TASK
-router.post("/", authMiddleware, async (req, res) => {
-  try {
-    const { title, description, status } = req.body;
-
-    const newTask = new Task({
-      title,
-      description,
-      status,
-      user: req.user.id,
-    });
-
-    const savedTask = await newTask.save();
-    res.status(201).json(savedTask);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// GET USER TASKS
+// @route   GET /api/tasks
+// @desc    Get all tasks (with optional filter)
+// @access  Private
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const tasks = await Task.find({ user: req.user.id });
+    const filter = { user: req.user.id };
+
+    // If status query is present
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    const tasks = await Task.find(filter).sort({ createdAt: -1 });
+
     res.json(tasks);
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// UPDATE TASK
-router.put("/:id", authMiddleware, async (req, res) => {
-  try {
-    const updatedTask = await Task.findOneAndUpdate(
-      { _id: req.params.id, user: req.user.id },
-      req.body,
-      { new: true }
-    );
-
-    res.json(updatedTask);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// DELETE TASK
-router.delete("/:id", authMiddleware, async (req, res) => {
-  try {
-    await Task.findOneAndDelete({
-      _id: req.params.id,
-      user: req.user.id,
-    });
-
-    res.json({ message: "Task deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err.message);
+    res.status(500).send("Server error");
   }
 });
 
