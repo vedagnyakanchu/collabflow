@@ -1,27 +1,31 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 
 // Middleware
-app.use(express.json()); // to parse JSON requests
+app.use(cors());
+app.use(express.json());
 
-// Import routes
-const projectRoutes = require("./routes/project");
-// If you have other routes later:
-// const userRoutes = require("./routes/user");
-// const taskRoutes = require("./routes/task");
+// Routes
+app.use("/api/auth", require("../routes/authRoutes"));
+app.use("/api/tasks", require("../routes/task")); // make sure taskRoutes exists
+app.use("/api/health", require("../routes/healthRoutes"));
+app.use("/api/projects", require("../routes/project"));
 
-// Test routes
+// Root route
 app.get("/", (req, res) => {
-  res.send("🔥 CollabFlow Server Running 🔥");
+  res.json({ message: "CollabFlow API Running 🚀" });
 });
 
-app.get("/health", (req, res) => {
-  res.send("Server is healthy");
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: err.message });
 });
-
-// Use routes
-app.use("/api/projects", projectRoutes);
-// app.use("/api/users", userRoutes);
-// app.use("/api/tasks", taskRoutes);
 
 module.exports = app;
+// Must be after all routes
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: err.message });
+});
