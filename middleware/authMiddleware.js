@@ -10,9 +10,9 @@ const authMiddleware = (req, res, next) => {
   try {
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // ✅ FIXED HERE
-    req.user = { id: decoded.id };
+    
+    // ✅ FIXED: Match JWT payload { id: user._id }
+    req.user = { id: decoded.id }; 
 
     next();
   } catch (err) {
