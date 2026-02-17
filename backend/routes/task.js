@@ -3,17 +3,14 @@ const router = express.Router();
 const Task = require("../models/Task");
 const authMiddleware = require("../middleware/authMiddleware");
 
-
 // =======================================
-// @route   GET /api/tasks
-// @desc    Get all tasks (with optional filter)
-// @access  Private
+// GET /api/tasks
+// Get all tasks for logged-in user
 // =======================================
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const filter = { user: req.user.id };
+    const filter = { createdBy: req.user.id };
 
-    // Optional status filter
     if (req.query.status) {
       filter.status = req.query.status;
     }
@@ -27,21 +24,19 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-
 // =======================================
-// @route   POST /api/tasks
-// @desc    Create a task
-// @access  Private
+// POST /api/tasks
+// Create a new task
 // =======================================
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { title, description, status } = req.body;
+    const { title, description } = req.body;
 
     const newTask = new Task({
       title,
       description,
-      status,
-      user: req.user.id
+      status: "todo",
+      createdBy: req.user.id,
     });
 
     const savedTask = await newTask.save();
@@ -53,52 +48,28 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 });
 
-
 // =======================================
-// @route   GET /api/tasks/:id
-// @desc    Get single task
-// @access  Private
+// PATCH /api/tasks/:id/status
+// Update only task status
 // =======================================
-router.get("/:id", authMiddleware, async (req, res) => {
+router.patch("/:id/status", authMiddleware, async (req, res) => {
   try {
+    const { status } = req.body;
+
+    if (!["todo", "in-progress", "done"].includes(status)) {
+      return res.status(400).json({ msg: "Invalid status value" });
+    }
+
     const task = await Task.findOne({
       _id: req.params.id,
-      user: req.user.id
+      createdBy: req.user.id,
     });
 
     if (!task) {
       return res.status(404).json({ msg: "Task not found" });
     }
 
-    res.json(task);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
-  }
-});
-
-
-// =======================================
-// @route   PUT /api/tasks/:id
-// @desc    Update task
-// @access  Private
-// =======================================
-router.put("/:id", authMiddleware, async (req, res) => {
-  try {
-    const { title, description, status } = req.body;
-
-    const task = await Task.findOne({
-      _id: req.params.id,
-      user: req.user.id
-    });
-
-    if (!task) {
-      return res.status(404).json({ msg: "Task not found" });
-    }
-
-    if (title) task.title = title;
-    if (description) task.description = description;
-    if (status) task.status = status;
+    task.status = status;
 
     const updatedTask = await task.save();
 
@@ -109,29 +80,26 @@ router.put("/:id", authMiddleware, async (req, res) => {
   }
 });
 
-
 // =======================================
-// @route   DELETE /api/tasks/:id
-// @desc    Delete task
-// @access  Private
+// DELETE /api/tasks/:id
+// Delete a task
 // =======================================
 router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const task = await Task.findOneAndDelete({
       _id: req.params.id,
-      user: req.user.id
+      createdBy: req.user.id,
     });
 
     if (!task) {
       return res.status(404).json({ msg: "Task not found" });
     }
 
-    res.json({ msg: "Task removed successfully" });
+    res.json({ msg: "Task deleted successfully" });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
   }
 });
-
 
 module.exports = router;
