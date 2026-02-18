@@ -32,9 +32,13 @@ router.post("/", authMiddleware, async (req, res) => {
   try {
     const { title, description } = req.body;
 
+    if (!title || !title.trim()) {
+      return res.status(400).json({ msg: "Title is required" });
+    }
+
     const newTask = new Task({
-      title,
-      description,
+      title: title.trim(),
+      description: description || "",
       status: "todo",
       createdBy: req.user.id,
     });
@@ -70,6 +74,43 @@ router.patch("/:id/status", authMiddleware, async (req, res) => {
     }
 
     task.status = status;
+
+    const updatedTask = await task.save();
+
+    res.json(updatedTask);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// =======================================
+// PATCH /api/tasks/:id
+// Update task title & description
+// =======================================
+router.patch("/:id", authMiddleware, async (req, res) => {
+  try {
+    const { title, description } = req.body;
+
+    const task = await Task.findOne({
+      _id: req.params.id,
+      createdBy: req.user.id,
+    });
+
+    if (!task) {
+      return res.status(404).json({ msg: "Task not found" });
+    }
+
+    if (title !== undefined) {
+      if (!title.trim()) {
+        return res.status(400).json({ msg: "Title cannot be empty" });
+      }
+      task.title = title.trim();
+    }
+
+    if (description !== undefined) {
+      task.description = description;
+    }
 
     const updatedTask = await task.save();
 

@@ -1,157 +1,69 @@
-import { useEffect, useState } from "react";
-import API from "../api/axios";
-
-import {
-  DndContext,
-  closestCenter,
-  useDraggable,
-  useDroppable,
-} from "@dnd-kit/core";
-
-import { CSS } from "@dnd-kit/utilities";
+import { FolderKanban, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 
 function Dashboard() {
-  const [tasks, setTasks] = useState([]);
-  const [title, setTitle] = useState("");
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    try {
-      const res = await API.get("/tasks");
-      setTasks(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const createTask = async () => {
-    if (!title.trim()) return;
-
-    try {
-      await API.post("/tasks", {
-        title,
-        description: "Created from frontend",
-      });
-
-      setTitle("");
-      fetchTasks();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const updateStatus = async (id, newStatus) => {
-    try {
-      await API.patch(`/tasks/${id}/status`, {
-        status: newStatus,
-      });
-
-      fetchTasks();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const handleDragEnd = async (event) => {
-    const { active, over } = event;
-
-    if (!over) return;
-
-    const taskId = active.id;
-    const newStatus = over.id;
-
-    await updateStatus(taskId, newStatus);
-  };
-
-  const todoTasks = tasks.filter((task) => task.status === "todo");
-  const inProgressTasks = tasks.filter(
-    (task) => task.status === "in-progress"
-  );
-  const doneTasks = tasks.filter((task) => task.status === "done");
+  const stats = [
+    {
+      title: "Total Projects",
+      value: "8",
+      icon: <FolderKanban size={22} />,
+    },
+    {
+      title: "Completed Tasks",
+      value: "124",
+      icon: <CheckCircle size={22} />,
+    },
+    {
+      title: "Pending Tasks",
+      value: "32",
+      icon: <Clock size={22} />,
+    },
+    {
+      title: "Overdue Tasks",
+      value: "5",
+      icon: <AlertTriangle size={22} />,
+    },
+  ];
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>CollabFlow Dashboard 🚀</h2>
-
-      {/* Create Task */}
-      <div style={{ marginBottom: "20px" }}>
-        <input
-          type="text"
-          placeholder="New task title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <button onClick={createTask}>Add Task</button>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-3xl font-bold text-white">
+          Dashboard 🚀
+        </h2>
+        <p className="text-gray-400 mt-2">
+          Overview of your workspace activity.
+        </p>
       </div>
 
-      <hr />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <div
+            key={index}
+            className="bg-slate-800 p-6 rounded-2xl shadow-lg hover:shadow-blue-500/20 transition-all duration-300 border border-slate-700"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-sm">{stat.title}</p>
+                <h3 className="text-2xl font-bold mt-2 text-white">
+                  {stat.value}
+                </h3>
+              </div>
+              <div className="text-blue-500">{stat.icon}</div>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      {/* Drag & Drop Board */}
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
-          <DroppableColumn id="todo" title="TODO" tasks={todoTasks} />
-          <DroppableColumn
-            id="in-progress"
-            title="IN PROGRESS"
-            tasks={inProgressTasks}
-          />
-          <DroppableColumn id="done" title="DONE" tasks={doneTasks} />
-        </div>
-      </DndContext>
+      <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+        <h3 className="text-lg font-semibold text-white mb-3">
+          Recent Activity
+        </h3>
+        <p className="text-gray-400">
+          Activity tracking coming soon...
+        </p>
+      </div>
     </div>
   );
 }
-
-/* ---------------- Draggable Task ---------------- */
-
-function DraggableTask({ task }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: task._id,
-  });
-
-  const style = {
-    ...cardStyle,
-    transform: CSS.Translate.toString(transform),
-    cursor: "grab",
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <p>{task.title}</p>
-    </div>
-  );
-}
-
-/* ---------------- Droppable Column ---------------- */
-
-function DroppableColumn({ id, title, tasks }) {
-  const { setNodeRef } = useDroppable({
-    id,
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={{ flex: 1, background: "#f3f3f3", padding: "10px" }}
-    >
-      <h3>{title}</h3>
-      {tasks.map((task) => (
-        <DraggableTask key={task._id} task={task} />
-      ))}
-    </div>
-  );
-}
-
-/* ---------------- Card Style ---------------- */
-
-const cardStyle = {
-  background: "white",
-  padding: "10px",
-  marginBottom: "10px",
-  borderRadius: "8px",
-};
 
 export default Dashboard;

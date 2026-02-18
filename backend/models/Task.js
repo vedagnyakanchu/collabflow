@@ -11,6 +11,7 @@ const taskSchema = new mongoose.Schema(
     description: {
       type: String,
       trim: true,
+      default: "",
     },
 
     status: {
@@ -19,7 +20,6 @@ const taskSchema = new mongoose.Schema(
       default: "todo",
     },
 
-    // Optional project (not required for now)
     project: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Project",
@@ -30,7 +30,6 @@ const taskSchema = new mongoose.Schema(
       ref: "User",
     },
 
-    // Required: who created the task
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
